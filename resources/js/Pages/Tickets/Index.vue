@@ -87,15 +87,19 @@ const navigateToCreate = () => {
                         <Column header="Actions">
                             <template #body="slotProps">
                                 <div class="flex">
+                                    <Link :href="route('tickets.show', slotProps.data.id)">
+                                        <Button label="" icon="pi pi-eye" text severity="contrast" />
+                                    </Link>
+
+                                    <Link :href="route('tickets.edit', slotProps.data.id)">
+                                        <Button label="" icon="pi pi-pencil" text severity="contrast" />
+                                    </Link>
+
                                     <Button
                                         label=""
                                         @click="() => deleteConfirm(slotProps.data.id)"
                                         icon="pi pi-trash" text
                                         severity="contrast" />
-
-                                    <Link :href="route('tickets.edit', slotProps.data.id)">
-                                        <Button label="" icon="pi pi-pencil" text severity="contrast" />
-                                    </Link>
                                 </div>
                             </template>
                         </Column>

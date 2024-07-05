@@ -11,25 +11,25 @@ class TicketPolicy
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): void
+    public function viewAny(User $user): bool
     {
-        //
+        return $user->role === 'admin'; // Admin can view all tickets
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Ticket $ticket): void
+    public function view(User $user, Ticket $ticket): bool
     {
-        //
+        return $user->role === 'admin' || $user->id === $ticket->user_id; // Admin or ticket owner can view
     }
 
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): void
+    public function create(User $user): bool
     {
-        //
+        return $user->role === 'user'; // Only users can create tickets
     }
 
     /**
@@ -37,7 +37,8 @@ class TicketPolicy
      */
     public function update(User $user, Ticket $ticket): bool
     {
-        return $ticket->user()->is($user);
+        // return $ticket->user()->is($user);
+        return $user->role === 'admin' || $ticket->user()->is($user);
     }
 
     /**
@@ -45,7 +46,8 @@ class TicketPolicy
      */
     public function delete(User $user, Ticket $ticket): bool
     {
-        return $this->update($user, $ticket);
+        // return $this->update($user, $ticket);
+        return $user->role === 'admin' || $ticket->user()->is($user);
     }
 
     /**

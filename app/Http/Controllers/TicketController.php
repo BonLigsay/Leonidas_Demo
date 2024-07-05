@@ -22,10 +22,20 @@ class TicketController extends Controller
         // return Inertia::render('Tickets/Index', ['tickets' => $tickets]);
         $user = auth()->user();
 
+        if ($user->role === 'admin') {
+            $tickets = Ticket::with('user:id')->latest('updated_at')->get();
+        } else {
+            $tickets = Ticket::with('user:id')->where('user_id', $user->id)->latest('updated_at')->get();
+        }
+
         return Inertia::render('Tickets/Index', [
-            // 'tickets' => Ticket::with('user:id')->latest()->get(),
-            'tickets' => Ticket::with('user:id')->where('user_id', $user->id)->latest('updated_at')->get(),
+            'tickets' => $tickets,
         ]);
+
+        // return Inertia::render('Tickets/Index', [
+        //     // 'tickets' => Ticket::with('user:id')->latest()->get(),
+        //     'tickets' => Ticket::with('user:id')->where('user_id', $user->id)->latest('updated_at')->get(),
+        // ]);
     }
 
     /**
@@ -64,9 +74,11 @@ class TicketController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Ticket $ticket)
     {
-        //
+        Gate::authorize('view', $ticket);
+
+        return Inertia::render('Tickets/Show', ['ticket' => $ticket]);
     }
 
     /**
@@ -74,6 +86,8 @@ class TicketController extends Controller
      */
     public function edit(Ticket $ticket)
     {
+        Gate::authorize('update', $ticket);
+
         return Inertia::render('Tickets/Edit', ['ticket' => $ticket]);
     }
 
@@ -101,8 +115,11 @@ class TicketController extends Controller
 
         $ticket->update($validated);
 
-        return redirect()->route('tickets.index')->with('success', 'Ticket updated successfully.');
+        // return redirect()->route('tickets.index')->with('success', 'Ticket updated successfully.');
+        return redirect()->route('tickets.index');
+
     }
+
 
     /**
      * Remove the specified resource from storage.
