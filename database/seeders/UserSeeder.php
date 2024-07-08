@@ -18,7 +18,14 @@ class UserSeeder extends Seeder
         // $password = Hash::make('12345678');
         $password = '12345678';
 
-        User::factory()->count(10)->create([
+        // User::factory()->count(10)->create([
+        //     'password' => $password
+        // ]);
+
+        User::factory()->count(1)->admin()->create([
+            'password' => $password
+        ]);
+        User::factory()->count(10)->user()->create([
             'password' => $password
         ]);
     }

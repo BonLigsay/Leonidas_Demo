@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Ticket;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class TicketPolicy
 {
@@ -13,7 +12,7 @@ class TicketPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->role === 'admin'; // Admin can view all tickets
+        return $user->hasRole('admin'); // Admin can view all tickets
     }
 
     /**
@@ -21,7 +20,7 @@ class TicketPolicy
      */
     public function view(User $user, Ticket $ticket): bool
     {
-        return $user->role === 'admin' || $user->id === $ticket->user_id; // Admin or ticket owner can view
+        return $user->hasRole('admin') || $user->id === $ticket->user_id; // Admin or ticket owner can view
     }
 
     /**
@@ -29,7 +28,7 @@ class TicketPolicy
      */
     public function create(User $user): bool
     {
-        return $user->role === 'user'; // Only users can create tickets
+        return $user->hasRole('user'); // Only users can create tickets
     }
 
     /**
@@ -37,8 +36,7 @@ class TicketPolicy
      */
     public function update(User $user, Ticket $ticket): bool
     {
-        // return $ticket->user()->is($user);
-        return $user->role === 'admin' || $ticket->user()->is($user);
+        return $user->hasRole('admin') || $user->id === $ticket->user_id; // Admin or ticket owner can update
     }
 
     /**
@@ -46,23 +44,22 @@ class TicketPolicy
      */
     public function delete(User $user, Ticket $ticket): bool
     {
-        // return $this->update($user, $ticket);
-        return $user->role === 'admin' || $ticket->user()->is($user);
+        return $user->hasRole('admin') || $user->id === $ticket->user_id; // Admin or ticket owner can delete
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Ticket $ticket): void
+    public function restore(User $user, Ticket $ticket): bool
     {
-        //
+        return false; // Not implemented
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Ticket $ticket): void
+    public function forceDelete(User $user, Ticket $ticket): bool
     {
-        //
+        return false; // Not implemented
     }
 }
