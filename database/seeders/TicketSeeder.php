@@ -6,6 +6,7 @@ use App\Models\Ticket;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class TicketSeeder extends Seeder
 {
@@ -14,6 +15,9 @@ class TicketSeeder extends Seeder
      */
     public function run(): void
     {
+         // Truncate the tickets table
+         DB::table('tickets')->truncate();
+
         // Ensure you have users in the database before running this
         if (User::count() > 0) {
             Ticket::factory()->count(50)->create();

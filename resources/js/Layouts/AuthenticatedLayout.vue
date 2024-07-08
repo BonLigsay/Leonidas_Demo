@@ -6,8 +6,14 @@ import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
+import { usePermission } from '@/Composables/permissions.js';
 
 const showingNavigationDropdown = ref(false);
+const { hasRole } = usePermission();
+const isAdmin = hasRole('admin');
+
 </script>
 
 <template>
@@ -32,6 +38,10 @@ const showingNavigationDropdown = ref(false);
                                 </NavLink>
                                 <NavLink :href="route('tickets.index')" :active="route().current('tickets.index')">
                                     Tickets
+                                </NavLink>
+                                <NavLink v-if="isAdmin" :href="route('administration')"
+                                    :active="route().current('administration')">
+                                    Administration
                                 </NavLink>
                             </div>
                         </div>
@@ -96,6 +106,9 @@ const showingNavigationDropdown = ref(false);
                         </ResponsiveNavLink>
                         <ResponsiveNavLink :href="route('tickets.index')" :active="route().current('tickets.index')">
                             Tickets
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink :href="route('administration')" :active="route().current('administration')">
+                            Administration
                         </ResponsiveNavLink>
                     </div>
 
