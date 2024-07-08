@@ -113,7 +113,7 @@ const updatedDate = computed(() => formatDate(ticketProps.ticket?.updated_at));
                 <InputError :message="form.errors.priority" class="mt-2" />
             </div>
 
-            <template v-if="ticketProps.ticket">
+            <template v-if="isEdit || isShow">
                 <div class="flex justify-between">
                     <div class="mb-4">
                         <label class="block text-sm font-medium"
