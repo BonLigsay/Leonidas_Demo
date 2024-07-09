@@ -68,7 +68,13 @@ class TicketController extends Controller
     {
         Gate::authorize('view', $ticket);
 
-        return Inertia::render('Tickets/Show', ['ticket' => $ticket]);
+        // Eager load followups with user relationship
+        $ticket->load('followups.user');
+
+        return Inertia::render('Tickets/Show', [
+            'ticket' => $ticket,
+            // 'followups' => $ticket->followups,
+        ]);
     }
 
     /**
@@ -77,6 +83,9 @@ class TicketController extends Controller
     public function edit(Ticket $ticket): Response
     {
         Gate::authorize('update', $ticket);
+
+        // Eager load followups with user relationship
+        $ticket->load('followups.user');
 
         return Inertia::render('Tickets/Edit', ['ticket' => $ticket]);
     }
@@ -96,6 +105,9 @@ class TicketController extends Controller
         ]);
 
         $ticket->update($validated);
+
+        // Eager load followups with user relationship
+        $ticket->load('followups.user');
 
         return redirect()->route('tickets.index');
     }

@@ -17,6 +17,7 @@ import ToastService from 'primevue/toastservice';
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button';
+import Card from 'primevue/card';
 import ConfirmDialog from 'primevue/confirmdialog';
 import ConfirmationService from 'primevue/confirmationservice';
 
@@ -46,6 +47,7 @@ createInertiaApp({
             .component('AutoComplete', AutoComplete)
             .component('DatePicker', DatePicker)
             .component('DataTable', DataTable)
+            .component('Card', Card)
             .component('ConfirmDialog', ConfirmDialog)
             .component('Toast', Toast)
             .component('Column', Column)

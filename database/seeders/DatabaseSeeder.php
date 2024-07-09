@@ -30,7 +30,8 @@ class DatabaseSeeder extends Seeder
 
         // Call individual seeders
         $this->call([
-            RolesTableSeeder::class,
+            // RolesTableSeeder::class,
+            RolesAndPermissionsSeeder::class,
             UserSeeder::class,
             TicketSeeder::class,
         ]);

@@ -16,7 +16,8 @@ const ticketProps = defineProps({
             status: 'open',
             priority: 'medium',
             created_at: '',
-            updated_at: ''
+            updated_at: '',
+            followups: []  // Ensure followups is part of the default object
         })
     },
     mode: {
@@ -24,6 +25,9 @@ const ticketProps = defineProps({
         default: 'create' // 'create', 'edit' or 'show'
     }
 });
+
+console.log(ticketProps.ticket.followups)
+
 
 const form = useForm({
     title: ticketProps.ticket?.title || '',
@@ -73,78 +77,116 @@ const updatedDate = computed(() => formatDate(ticketProps.ticket?.updated_at));
 </script>
 
 <template>
-    <div class="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8">
-        <form @submit.prevent="save">
-            <div class="mb-4">
-                <label for="title" class="block text-sm font-medium"
-                    :class="{ 'text-gray-500': isShow, 'text-gray-700': !isShow }">Title</label>
-                <input v-model="form.title" id="title" type="text" :disabled="isDisabled" :class="[
-                    'block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm',
-                    { 'cursor-not-allowed text-gray-500 bg-gray-200': isDisabled }
-                ]" />
-                <InputError :message="form.errors.title" class="mt-2" />
-            </div>
-
-            <div class="mb-4">
-                <label for="description" class="block text-sm font-medium"
-                    :class="{ 'text-gray-500': isShow, 'text-gray-700': !isShow }">Description</label>
-                <textarea v-model="form.description" id="description" :disabled="isDisabled" :class="[
-                    'block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm',
-                    { 'cursor-not-allowed text-gray-500 bg-gray-200': isDisabled }
-                ]" rows="4"></textarea>
-                <InputError :message="form.errors.description" class="mt-2" />
-            </div>
-
-            <div class="mb-4">
-                <label for="status" class="block text-sm font-medium"
-                    :class="{ 'text-gray-500': isShow, 'text-gray-700': !isShow }">Status</label>
-                <select v-model="form.status" id="status" :disabled="isDisabled" :class="[
-                    'block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm',
-                    { 'cursor-not-allowed text-gray-500 bg-gray-200': isDisabled }
-                ]">
-                    <option value="open">Open</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="closed">Closed</option>
-                </select>
-                <InputError :message="form.errors.status" class="mt-2" />
-            </div>
-
-            <div class="mb-4">
-                <label for="priority" class="block text-sm font-medium"
-                    :class="{ 'text-gray-500': isShow, 'text-gray-700': !isShow }">Priority</label>
-                <select v-model="form.priority" id="priority" :disabled="isDisabled" :class="[
-                    'block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm',
-                    { 'cursor-not-allowed text-gray-500 bg-gray-200': isDisabled }
-                ]">
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                </select>
-                <InputError :message="form.errors.priority" class="mt-2" />
-            </div>
-
-            <template v-if="isEdit || isShow">
-                <div class="flex justify-between">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium"
-                            :class="{ 'text-gray-500': isShow, 'text-gray-700': !isShow }">Created At</label>
-                        <span :class="{ 'text-gray-500': isShow, 'text-gray-900': !isShow }">{{ createdDate }}</span>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium"
-                            :class="{ 'text-gray-500': isShow, 'text-gray-700': !isShow }">Updated At</label>
-                        <span :class="{ 'text-gray-500': isShow, 'text-gray-900': !isShow }">{{ updatedDate }}</span>
-                    </div>
+    <div class="max-w-2xl mx-auto p-4 sm:p-6 md:max-w-full md:space-x-8 lg:p-8">
+        <div class="grid md:grid-cols-2 h-full gap-8">
+            <form @submit.prevent="save" class="w-full min-h-full">
+                <div class="mb-4">
+                    <label for="title" class="block text-sm font-medium"
+                        :class="{ 'text-gray-500': isShow, 'text-gray-700': !isShow }">Title</label>
+                    <input v-model="form.title" id="title" type="text" :disabled="isDisabled" :class="[
+                        'block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm',
+                        { 'cursor-not-allowed text-gray-500 bg-gray-200': isDisabled }
+                    ]" />
+                    <InputError :message="form.errors.title" class="mt-2" />
                 </div>
-            </template>
 
-            <div v-if="isEdit || isCreate" class="flex justify-end gap-2">
-                <Button label="Cancel" severity="secondary" class="mt-4" type="button"
-                    @click="form.reset(); form.clearErrors()" />
-                <Button severity="primary" class="mt-4" type="submit">{{ isEdit ? 'Update Ticket' : 'Create Ticket'
-                    }}</Button>
-            </div>
-        </form>
+                <div class="mb-4">
+                    <label for="description" class="block text-sm font-medium"
+                        :class="{ 'text-gray-500': isShow, 'text-gray-700': !isShow }">Description</label>
+                    <textarea v-model="form.description" id="description" :disabled="isDisabled" :class="[
+                        'block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm',
+                        { 'cursor-not-allowed text-gray-500 bg-gray-200': isDisabled }
+                    ]" rows="4"></textarea>
+                    <InputError :message="form.errors.description" class="mt-2" />
+                </div>
+
+                <div class="mb-4">
+                    <label for="status" class="block text-sm font-medium"
+                        :class="{ 'text-gray-500': isShow, 'text-gray-700': !isShow }">Status</label>
+                    <select v-model="form.status" id="status" :disabled="isDisabled" :class="[
+                        'block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm',
+                        { 'cursor-not-allowed text-gray-500 bg-gray-200': isDisabled }
+                    ]">
+                        <option value="open">Open</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                    <InputError :message="form.errors.status" class="mt-2" />
+                </div>
+
+                <div class="mb-4">
+                    <label for="priority" class="block text-sm font-medium"
+                        :class="{ 'text-gray-500': isShow, 'text-gray-700': !isShow }">Priority</label>
+                    <select v-model="form.priority" id="priority" :disabled="isDisabled" :class="[
+                        'block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm',
+                        { 'cursor-not-allowed text-gray-500 bg-gray-200': isDisabled }
+                    ]">
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                    <InputError :message="form.errors.priority" class="mt-2" />
+                </div>
+
+                <template v-if="isEdit || isShow">
+                    <div class="flex justify-between">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium"
+                                :class="{ 'text-gray-500': isShow, 'text-gray-700': !isShow }">Created At</label>
+                            <span :class="{ 'text-gray-500': isShow, 'text-gray-900': !isShow }">{{ createdDate
+                                }}</span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium"
+                                :class="{ 'text-gray-500': isShow, 'text-gray-700': !isShow }">Updated At</label>
+                            <span :class="{ 'text-gray-500': isShow, 'text-gray-900': !isShow }">{{ updatedDate
+                                }}</span>
+                        </div>
+                    </div>
+                </template>
+
+
+
+                <div v-if="isEdit || isCreate" class="flex justify-end gap-2">
+                    <Button label="Cancel" severity="secondary" class="mt-4" type="button"
+                        @click="form.reset(); form.clearErrors()" />
+                    <Button severity="primary" class="mt-4" type="submit">{{ isEdit ? 'Update Ticket' : 'Create Ticket'
+                        }}</Button>
+                </div>
+            </form>
+
+
+            <form @submit.prevent="saveFollowUps" class="w-full">
+                <!-- Followups -->
+                <div v-if="ticketProps.ticket.followups.length" class="mt-6">
+                    <h2 class="text-lg font-semibold mb-4">Followups</h2>
+                    <ul>
+                        <li v-for="followup in ticketProps.ticket.followups" :key="followup.id" class="mb-4">
+                            <div class="bg-white shadow rounded-lg p-4">
+                                <div class="flex justify-between">
+                                    <div>
+                                        <span class="font-medium">{{ followup.user.name }}</span>
+                                        <span class="text-sm text-gray-500 ml-2">{{ formatDate(followup.created_at)
+                                            }}</span>
+                                    </div>
+                                    <div>
+                                        <span
+                                            class="inline-block px-2 py-1 text-xs font-semibold text-white rounded-full"
+                                            :class="{
+                                                'bg-blue-500': followup.type === 'comment',
+                                                'bg-green-500': followup.type === 'solution'
+                                            }">
+                                            {{ followup.type }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <p class="mt-2 text-gray-700">{{ followup.content }}</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
     </div>
 </template>
