@@ -1,11 +1,11 @@
 <script setup>
-import { useForm, usePage } from '@inertiajs/vue3';
+import { useForm } from '@inertiajs/vue3';
 import InputError from '@/Components/InputError.vue';
 import { computed } from 'vue';
 import { useToast } from "primevue/usetoast";
 
 const toast = useToast();
-const { props } = usePage();
+// const { props } = usePage();
 
 const ticketProps = defineProps({
     ticket: {
@@ -44,11 +44,21 @@ const save = () => {
         form.put(route('tickets.update', ticketProps.ticket.id), {
             onSuccess: () =>
                 toast.add({ severity: 'success', summary: 'Success', detail: 'Ticket updated', life: 3000 }),
+            // onError: () => {
+            //     if (form.errors.message) {
+            //         toast.add({ severity: 'error', summary: 'Error', detail: form.errors.message, life: 3000 });
+            //     }
+            // },
         });
     } else if (isCreate.value) {
         form.post(route('tickets.store'), {
             onSuccess: () =>
                 toast.add({ severity: 'success', summary: 'Success', detail: 'Ticket created', life: 3000 }),
+            // onError: () => {
+            //     if (form.errors.message) {
+            //         toast.add({ severity: 'error', summary: 'Error', detail: form.errors.message, life: 3000 });
+            //     }
+            // },
         });
     }
 };

@@ -28,7 +28,8 @@ class TicketPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole('user'); // Only users can create tickets
+        // return $user->hasRole('user'); // Only users can create tickets
+        return !$user->hasRole('admin') && $user->hasRole('user'); // Only users who are not admins can create tickets
     }
 
     /**
