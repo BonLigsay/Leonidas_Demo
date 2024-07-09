@@ -30,16 +30,16 @@ class FollowupController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'ticket_id' => 'required|exists:tickets,id',
-            'type' => 'required|in:comment,solution',
             'content' => 'required|string',
+            'type' => 'required|string|in:comment,solution',
+            'ticket_id' => 'required|exists:tickets,id',
         ]);
 
         $followup = Followup::create([
-            'ticket_id' => $request->ticket_id,
-            'user_id' => Auth::id(),
-            'type' => $request->type,
             'content' => $request->content,
+            'type' => $request->type,
+            'ticket_id' => $request->ticket_id,
+            'user_id' => Auth::id(), // or another way to get the user_id
         ]);
 
         return redirect()->back()->with('message', 'Followup created successfully.');

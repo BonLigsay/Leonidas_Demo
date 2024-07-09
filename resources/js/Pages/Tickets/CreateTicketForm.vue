@@ -3,9 +3,9 @@ import { useForm } from '@inertiajs/vue3';
 import InputError from '@/Components/InputError.vue';
 import { computed } from 'vue';
 import { useToast } from "primevue/usetoast";
+// import { preserveState } from '@inertiajs/inertia-vue3';
 
 const toast = useToast();
-// const { props } = usePage();
 
 const ticketProps = defineProps({
     ticket: {
@@ -26,9 +26,6 @@ const ticketProps = defineProps({
     }
 });
 
-console.log(ticketProps.ticket.followups)
-
-
 const form = useForm({
     title: ticketProps.ticket?.title || '',
     description: ticketProps.ticket?.description || '',
@@ -36,6 +33,12 @@ const form = useForm({
     priority: ticketProps.ticket?.priority || 'medium',
     created_at: ticketProps.ticket?.created_at || '',
     updated_at: ticketProps.ticket?.updated_at || '',
+});
+
+const followupForm = useForm({
+    content: '',
+    type: 'comment',
+    ticket_id: ticketProps.ticket?.id || null, // Ensure ticketProps.ticket.id is properly accessed
 });
 
 const isEdit = computed(() => ticketProps.mode === 'edit');
@@ -48,23 +51,34 @@ const save = () => {
         form.put(route('tickets.update', ticketProps.ticket.id), {
             onSuccess: () =>
                 toast.add({ severity: 'success', summary: 'Success', detail: 'Ticket updated', life: 3000 }),
-            // onError: () => {
-            //     if (form.errors.message) {
-            //         toast.add({ severity: 'error', summary: 'Error', detail: form.errors.message, life: 3000 });
-            //     }
-            // },
         });
     } else if (isCreate.value) {
         form.post(route('tickets.store'), {
             onSuccess: () =>
                 toast.add({ severity: 'success', summary: 'Success', detail: 'Ticket created', life: 3000 }),
-            // onError: () => {
-            //     if (form.errors.message) {
-            //         toast.add({ severity: 'error', summary: 'Error', detail: form.errors.message, life: 3000 });
-            //     }
-            // },
         });
     }
+};
+
+const saveFollowUps = () => {
+    followupForm.post(route('followups.store'), {
+        onSuccess: (response) => {
+            toast.add({ severity: 'success', summary: 'Success', detail: 'Follow-up added', life: 3000 });
+            // console.log(response.props.ticket.followups[response.props.ticket.followups.length - 1]);
+            const last = response.props.ticket.followups[response.props.ticket.followups.length - 1]
+            if (ticketProps.ticket) {
+                ticketProps.ticket.followups.unshift(last); // Assuming response.data contains the new follow-up
+                // preserveState({ data: ticketProps.ticket });
+            }
+            // preserveState({ data: ticketProps.ticket });
+            followupForm.reset();
+        },
+        onError: () => {
+            if (followupForm.errors.message) {
+                toast.add({ severity: 'error', summary: 'Error', detail: followupForm.errors.message, life: 3000 });
+            }
+        },
+    });
 };
 
 const formatDate = (timestamp) => {
@@ -78,7 +92,7 @@ const updatedDate = computed(() => formatDate(ticketProps.ticket?.updated_at));
 
 <template>
     <div class="max-w-2xl mx-auto p-4 sm:p-6 md:max-w-full md:space-x-8 lg:p-8">
-        <div class="grid md:grid-cols-2 h-full gap-8">
+        <div class="grid md:grid-cols-3 h-full gap-8">
             <form @submit.prevent="save" class="w-full min-h-full">
                 <div class="mb-4">
                     <label for="title" class="block text-sm font-medium"
@@ -146,8 +160,6 @@ const updatedDate = computed(() => formatDate(ticketProps.ticket?.updated_at));
                     </div>
                 </template>
 
-
-
                 <div v-if="isEdit || isCreate" class="flex justify-end gap-2">
                     <Button label="Cancel" severity="secondary" class="mt-4" type="button"
                         @click="form.reset(); form.clearErrors()" />
@@ -156,12 +168,16 @@ const updatedDate = computed(() => formatDate(ticketProps.ticket?.updated_at));
                 </div>
             </form>
 
-
-            <form @submit.prevent="saveFollowUps" class="w-full">
-                <!-- Followups -->
-                <div v-if="ticketProps.ticket.followups.length" class="mt-6">
-                    <h2 class="text-lg font-semibold mb-4">Followups</h2>
-                    <ul>
+            <div v-if="ticketProps.ticket.followups.length" class="mt-6">
+                <h2 class="text-lg font-semibold mb-4">Followups</h2>
+                <ul>
+                    <ScrollPanel
+                    class="max-h-screen"
+                    style="width: 100%;" :dt="{
+                        bar: {
+                            background: '{primary.color}'
+                        }
+                    }">
                         <li v-for="followup in ticketProps.ticket.followups" :key="followup.id" class="mb-4">
                             <div class="bg-white shadow rounded-lg p-4">
                                 <div class="flex justify-between">
@@ -174,8 +190,8 @@ const updatedDate = computed(() => formatDate(ticketProps.ticket?.updated_at));
                                         <span
                                             class="inline-block px-2 py-1 text-xs font-semibold text-white rounded-full"
                                             :class="{
-                                                'bg-blue-500': followup.type === 'comment',
-                                                'bg-green-500': followup.type === 'solution'
+                                                'bg-amber-400': followup.type === 'comment',
+                                                'bg-blue-500': followup.type === 'solution'
                                             }">
                                             {{ followup.type }}
                                         </span>
@@ -184,9 +200,38 @@ const updatedDate = computed(() => formatDate(ticketProps.ticket?.updated_at));
                                 <p class="mt-2 text-gray-700">{{ followup.content }}</p>
                             </div>
                         </li>
-                    </ul>
+                    </ScrollPanel>
+                </ul>
+            </div>
+
+            <form @submit.prevent="saveFollowUps" class="w-full">
+                <div class="mb-4">
+                    <label for="followup-content" class="block text-sm font-medium">Follow-up Content</label>
+                    <textarea v-model="followupForm.content" id="followup-content" :class="[
+                        'block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm'
+                    ]" rows="4"></textarea>
+                    <InputError :message="followupForm.errors.content" class="mt-2" />
+                </div>
+
+                <div class="mb-4">
+                    <label for="followup-type" class="block text-sm font-medium">Follow-up Type</label>
+                    <select v-model="followupForm.type" id="followup-type" :class="[
+                        'block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm'
+                    ]">
+                        <option value="comment">Comment</option>
+                        <option value="solution">Solution</option>
+                    </select>
+                    <InputError :message="followupForm.errors.type" class="mt-2" />
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <Button label="Reset" severity="secondary" class="mt-4" type="button"
+                        @click="followupForm.reset(); followupForm.clearErrors()" />
+                    <Button severity="primary" class="mt-4" type="submit">Add Follow-up</Button>
                 </div>
             </form>
+
+
         </div>
     </div>
 </template>

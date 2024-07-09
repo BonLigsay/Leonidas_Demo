@@ -2,9 +2,9 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { useForm, Head, Link, usePage } from '@inertiajs/vue3';
 import CreateTicketForm from './CreateTicketForm.vue';
-
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
+import { usePermission } from '@/Composables/permissions.js';
 
 const confirm = useConfirm();
 const toast = useToast();
@@ -44,6 +44,9 @@ const navigateToCreate = () => {
     route('tickets.create');
 };
 
+const { hasRole } = usePermission();
+const isUser = hasRole('user');
+
 // const showToast = () =>  toast.add({ severity: 'success', summary: 'Success', detail: 'wqwqewqewqe', life: 3000 });
 // // Show toast message if there's a success message
 // if (flash) {
@@ -71,8 +74,8 @@ const navigateToCreate = () => {
                         currentPageReportTemplate="{first} to {last} of {totalRecords}">
 
                         <template #header>
-                            <div class="flex flex-wrap items-center justify-end gap-2">
-                                <Link :href="route('tickets.create')">
+                            <div class="flex flex-wrap items-center justify-end gap-2 min-h-8">
+                                <Link v-if="isUser" :href="route('tickets.create')">
                                     <Button label="Add Ticket" icon="pi pi-plus-circle" rounded link />
                                 </Link>
                             </div>

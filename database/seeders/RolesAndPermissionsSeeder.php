@@ -26,10 +26,11 @@ class RolesAndPermissionsSeeder extends Seeder
         // Define Permissions
         $permissions = [
             'view followups',
-            'create comment followup',
-            'create solution followup',
-            'update followup',
-            'delete followup'
+            'create followups',
+            'create comment followups',
+            'create solution followups',
+            'update followups',
+            'delete followups'
         ];
 
         // Create Roles if they don't exist
@@ -45,6 +46,13 @@ class RolesAndPermissionsSeeder extends Seeder
         // Assign Permissions to Roles
         $adminRole = Role::where('name', 'admin')->first();
         $userRole = Role::where('name', 'user')->first();
+
+        // Verify if admin role has the 'create solution followups' permission
+        $adminPermissions = $adminRole->permissions->pluck('name')->toArray();
+        if (!in_array('create solution followups', $adminPermissions)) {
+            // Add the permission explicitly if it's missing
+            $adminRole->givePermissionTo('create solution followups');
+        }
 
         $adminRole->syncPermissions($permissions);
         $userRole->syncPermissions([

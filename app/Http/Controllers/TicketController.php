@@ -71,6 +71,11 @@ class TicketController extends Controller
         // Eager load followups with user relationship
         $ticket->load('followups.user');
 
+        // // Eager load followups with user relationship
+        $ticket->load(['followups' => function ($query) {
+            $query->latest(); // Load followups in descending order by created_at
+        }, 'followups.user']);
+
         return Inertia::render('Tickets/Show', [
             'ticket' => $ticket,
             // 'followups' => $ticket->followups,
@@ -86,6 +91,11 @@ class TicketController extends Controller
 
         // Eager load followups with user relationship
         $ticket->load('followups.user');
+
+        // // Eager load followups with user relationship
+        // $ticket->load(['followups' => function ($query) {
+        //     $query->latest(); // Load followups in descending order by created_at
+        // }, 'followups.user']);
 
         return Inertia::render('Tickets/Edit', ['ticket' => $ticket]);
     }
