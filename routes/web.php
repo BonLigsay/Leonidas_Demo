@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FollowupController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TicketController;
 use Illuminate\Foundation\Application;
@@ -35,5 +36,14 @@ Route::middleware('auth')->group(function () {
 Route::resource('tickets', TicketController::class)
     // ->only(['index', 'store'])
     ->middleware(['auth', 'verified']);
+
+Route::middleware(['auth'])->group(function () {
+    // Route::post('/followups', [FollowupController::class, 'store'])->middleware('can.create.solution')->name('followups.store');
+    Route::post('/followups', [FollowupController::class, 'store'])->name('followups.store');
+    Route::get('/tickets/{ticket}/followups', [FollowupController::class, 'index'])->name('followups.index');
+    Route::get('/followups/{followup}', [FollowupController::class, 'show'])->name('followups.show');
+    Route::put('/followups/{followup}', [FollowupController::class, 'update'])->middleware('can.create.solution')->name('followups.update');
+    Route::delete('/followups/{followup}', [FollowupController::class, 'destroy'])->middleware('can.create.solution')->name('followups.destroy');
+});
 
 require __DIR__.'/auth.php';

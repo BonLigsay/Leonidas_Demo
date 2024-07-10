@@ -17,6 +17,10 @@ import ToastService from 'primevue/toastservice';
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button';
+import Card from 'primevue/card';
+import ScrollPanel from 'primevue/scrollpanel';
+import Tag from 'primevue/tag';
+import Select from 'primevue/select';
 import ConfirmDialog from 'primevue/confirmdialog';
 import ConfirmationService from 'primevue/confirmationservice';
 
@@ -46,6 +50,10 @@ createInertiaApp({
             .component('AutoComplete', AutoComplete)
             .component('DatePicker', DatePicker)
             .component('DataTable', DataTable)
+            .component('Card', Card)
+            .component('Tag', Tag)
+            .component('Select', Select)
+            .component('ScrollPanel', ScrollPanel)
             .component('ConfirmDialog', ConfirmDialog)
             .component('Toast', Toast)
             .component('Column', Column)

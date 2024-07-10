@@ -28,4 +28,8 @@ class Ticket extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function followups()
+    {
+        return $this->hasMany(Followup::class);
+    }
 }

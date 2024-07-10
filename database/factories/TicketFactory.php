@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Followup;
 use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -29,5 +30,28 @@ class TicketFactory extends Factory
             'created_at' => now(),
             'updated_at' => now(),
         ];
+    }
+
+     /**
+     * Configure the model factory.
+     *
+     * @return $this
+     */
+    public function configure()
+    {
+        return $this->afterCreating(function (Ticket $ticket) {
+            // Create 3 followups for each ticket
+            Followup::factory()->count(3)->create([
+                'ticket_id' => $ticket->id,
+                'user_id' => function () use ($ticket) {
+                    // Randomly select either the ticket's user_id or an admin user_id
+                    $randomUser = User::whereHas('roles', function ($query) {
+                        $query->where('name', 'admin');
+                    })->inRandomOrder()->first();
+
+                    return $randomUser ? $randomUser->id : $ticket->user_id;
+                },
+            ]);
+        });
     }
 }

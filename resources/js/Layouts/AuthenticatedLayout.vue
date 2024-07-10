@@ -6,13 +6,16 @@ import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link } from '@inertiajs/vue3';
-import { computed } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+// import { computed } from 'vue';
+// import { usePage } from '@inertiajs/vue3';
 import { usePermission } from '@/Composables/permissions.js';
 
 const showingNavigationDropdown = ref(false);
 const { hasRole } = usePermission();
 const isAdmin = hasRole('admin');
+
+// const { props } = usePage()
+// console.log(props.auth.user)
 
 </script>
 
