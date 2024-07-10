@@ -29,6 +29,23 @@ class FollowupController extends Controller
 
     public function store(Request $request)
     {
+        Gate::authorize('create', Followup::class);
+
+        if ($request->type === 'solution' ) {
+            // Gate::authorize('createSolution', Followup::class);
+            if (!Gate::allows('createSolution', Followup::class)) {
+                // return redirect()->back()->with('error', 'Unauthorized to create solution follow-ups.');
+                return back()->withErrors(['Unauthorized to create solution follow-ups.']);
+            }
+        }
+
+        if ($request->type === 'comment' ) {
+            // Gate::authorize('createComment', Followup::class);
+            if (!Gate::allows('createComment', Followup::class)) {
+                return redirect()->back()->with('error', 'Unauthorized to create comment follow-ups.');
+            }
+        }
+
         $request->validate([
             'content' => 'required|string',
             'type' => 'required|string|in:comment,solution',
@@ -42,7 +59,8 @@ class FollowupController extends Controller
             'user_id' => Auth::id(), // or another way to get the user_id
         ]);
 
-        return redirect()->back()->with('message', 'Followup created successfully.');
+        return redirect()->back()->with('success', 'Followup created successfully.');
+
     }
 
     public function update(Request $request, Followup $followup)

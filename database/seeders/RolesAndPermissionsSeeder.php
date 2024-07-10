@@ -57,7 +57,10 @@ class RolesAndPermissionsSeeder extends Seeder
         $adminRole->syncPermissions($permissions);
         $userRole->syncPermissions([
             'view followups',
-            'create comment followup'
+            'create followups',
+            'create comment followups',
+            'update followups',
+            'delete followups'
         ]);
     }
 }

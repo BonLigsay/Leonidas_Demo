@@ -90,12 +90,12 @@ class TicketController extends Controller
         Gate::authorize('update', $ticket);
 
         // Eager load followups with user relationship
-        $ticket->load('followups.user');
+        // $ticket->load('followups.user');
 
         // // Eager load followups with user relationship
-        // $ticket->load(['followups' => function ($query) {
-        //     $query->latest(); // Load followups in descending order by created_at
-        // }, 'followups.user']);
+        $ticket->load(['followups' => function ($query) {
+            $query->latest(); // Load followups in descending order by created_at
+        }, 'followups.user']);
 
         return Inertia::render('Tickets/Edit', ['ticket' => $ticket]);
     }
@@ -117,7 +117,12 @@ class TicketController extends Controller
         $ticket->update($validated);
 
         // Eager load followups with user relationship
-        $ticket->load('followups.user');
+        // $ticket->load('followups.user');
+
+        // // Eager load followups with user relationship
+        $ticket->load(['followups' => function ($query) {
+            $query->latest(); // Load followups in descending order by created_at
+        }, 'followups.user']);
 
         return redirect()->route('tickets.index');
     }
