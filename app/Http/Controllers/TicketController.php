@@ -44,7 +44,7 @@ class TicketController extends Controller
     public function store(Request $request): RedirectResponse
     {
         // try {
-            Gate::authorize('create', Ticket::class);
+        Gate::authorize('create', Ticket::class);
         // } catch (AuthorizationException $e) {
         //     return redirect()->back()->withErrors(['message' => 'You are not authorized to create a ticket.']);
         // }
@@ -68,13 +68,9 @@ class TicketController extends Controller
     {
         Gate::authorize('view', $ticket);
 
-        // Eager load followups with user relationship
-        $ticket->load('followups.user');
-
-        // // Eager load followups with user relationship
-        // $ticket->load(['followups' => function ($query) {
-        //     $query->latest(); // Load followups in descending order by created_at
-        // }, 'followups.user']);
+        $ticket->load(['followups' => function ($query) {
+            $query->oldest('created_at'); // Load followups in ascending order by created_at
+        }, 'followups.user']);
 
         return Inertia::render('Tickets/Show', [
             'ticket' => $ticket,
@@ -89,13 +85,9 @@ class TicketController extends Controller
     {
         Gate::authorize('update', $ticket);
 
-        // Eager load followups with user relationship
-        $ticket->load('followups.user');
-
-        // // Eager load followups with user relationship
-        // $ticket->load(['followups' => function ($query) {
-        //     $query->latest(); // Load followups in descending order by created_at
-        // }, 'followups.user']);
+        $ticket->load(['followups' => function ($query) {
+            $query->oldest('created_at'); // Load followups in ascending order by created_at
+        }, 'followups.user']);
 
         return Inertia::render('Tickets/Edit', ['ticket' => $ticket]);
     }

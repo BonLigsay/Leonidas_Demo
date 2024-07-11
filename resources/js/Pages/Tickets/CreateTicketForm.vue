@@ -6,9 +6,20 @@ import { useToast } from "primevue/usetoast";
 import { Inertia } from '@inertiajs/inertia'; // Import Inertia
 import { usePermission } from '@/Composables/permissions.js';
 import { useConfirm } from "primevue/useconfirm";
+import { usePage } from "@inertiajs/vue3";
+
+const { props } = usePage()
+
+const user = props.auth.user;
 
 const { hasPermission } = usePermission();
+const { hasRole } = usePermission();
+
 const canCreateSolutionFollowups = hasPermission('create solution followups');
+const isAdmin = hasRole('admin');
+const canDeleteFollowups = hasPermission('delete followups');
+
+console.log(isAdmin)
 
 const confirm = useConfirm();
 const toast = useToast();
@@ -91,9 +102,7 @@ const editFollowupForm = useForm({
     ticket_id: ticketProps.ticket?.id || null,
 });
 
-const deleteFollowupForm = useForm({
-    // followup_id: null,
-});
+const deleteFollowupForm = useForm({});
 
 const isEditingFollowup = ref(null);
 
@@ -113,6 +122,7 @@ const cancelEditingFollowup = () => {
 const saveEditedFollowup = () => {
     editFollowupForm.put(route('followups.update', editFollowupForm.followup_id), {
         onSuccess: (response) => {
+            console.log({response})
             const message = response.props.flash.success || 'Follow-up updated';
             toast.add({ severity: 'success', summary: 'Success', detail: message, life: 3000 });
             const updatedFollowup = response.props.ticket.followups.find(f => f.id === editFollowupForm.followup_id)
@@ -277,12 +287,17 @@ const deleteConfirm = (followupId) => {
                                             <span class="font-medium">{{ followup.user.name }}</span>
 
                                             <div>
-
+                                                <!-- {{ followup.id }} -->
                                                 <span class="text-sm text-gray-500">{{
-                                                    formatDate(followup.updated_at)
+                                                    formatDate(followup.created_at)
                                                     }}</span>
+
                                                 <span v-if="followup.created_at !== followup.updated_at"
                                                     class="text-sm text-gray-400"> - edited</span>
+
+                                                <!-- <span class="text-sm text-gray-500">{{
+                                                    (formatDate(followup.updated_at))
+                                                }}</span> -->
                                             </div>
 
                                         </div>
@@ -292,10 +307,13 @@ const deleteConfirm = (followupId) => {
                                                 {{ followup.type }}
                                             </Tag>
                                             <div class="flex justify-end">
-                                                <Button v-if="isEdit" icon="pi pi-pencil" text size="small"
-                                                    severity="secondary" @click="startEditingFollowup(followup)" />
-                                                <Button v-if="isEdit" icon="pi pi-trash" text size="small"
-                                                    severity="danger" @click="() => deleteConfirm(followup.id)" />
+                                                <Button v-if="isEdit && (followup.user_id === user.id)"
+                                                    icon="pi pi-pencil" text size="small" severity="secondary"
+                                                    @click="startEditingFollowup(followup)" />
+                                                <Button
+                                                    v-if="(isEdit && isAdmin && canDeleteFollowups) || isEdit && (followup.user_id === user.id)"
+                                                    icon="pi pi-trash" text size="small" severity="danger"
+                                                    @click="() => deleteConfirm(followup.id)" />
                                             </div>
                                         </div>
 

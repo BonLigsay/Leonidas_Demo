@@ -65,7 +65,10 @@ class FollowupController extends Controller
 
     public function update(Request $request, Followup $followup)
     {
-        Gate::authorize('update', $followup);
+        // Gate::authorize('update', $followup);
+        if (!Gate::allows('update', $followup)) {
+            return back()->withErrors(['Unauthorized to update follow-up.']);
+        }
 
         $request->validate([
             'content' => 'required|string',
@@ -75,12 +78,16 @@ class FollowupController extends Controller
             'content' => $request->content,
         ]);
 
-        return redirect()->back()->with('message', 'Followup updated successfully.');
+        return redirect()->back()->with('success', 'Followup updated successfully.');
     }
 
     public function destroy(Followup $followup)
     {
-        Gate::authorize('delete', $followup);
+        // Gate::authorize('delete', $followup);
+        // Gate::authorize('update', $followup);
+        if (!Gate::allows('delete', $followup)) {
+            return back()->withErrors(['Unauthorized to delete follow-up.']);
+        }
 
         $followup->delete();
 
