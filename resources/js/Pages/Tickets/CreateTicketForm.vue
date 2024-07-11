@@ -1,14 +1,16 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3';
 import InputError from '@/Components/InputError.vue';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useToast } from "primevue/usetoast";
 import { Inertia } from '@inertiajs/inertia'; // Import Inertia
 import { usePermission } from '@/Composables/permissions.js';
+import { useConfirm } from "primevue/useconfirm";
 
 const { hasPermission } = usePermission();
 const canCreateSolutionFollowups = hasPermission('create solution followups');
 
+const confirm = useConfirm();
 const toast = useToast();
 
 const ticketProps = defineProps({
@@ -69,14 +71,59 @@ const saveFollowUps = () => {
         onSuccess: (response) => {
             const message = response.props.flash.success || 'Follow-up added';
             toast.add({ severity: 'success', summary: 'Success', detail: message, life: 3000 });
-            const newFollowup = response.props.ticket.followups[0];
+            const newFollowup = response.props.ticket.followups[response.props.ticket.followups.length -1];
             if (ticketProps.ticket) {
-                ticketProps.ticket.followups.unshift(newFollowup);
+                ticketProps.ticket.followups.push(newFollowup);
             }
             followupForm.reset();
         },
         onError: (errors) => {
             const message = errors[0] || 'Error adding follow-up';
+            toast.add({ severity: 'error', summary: 'Error', detail: message, life: 3000 });
+        },
+    });
+};
+
+const editFollowupForm = useForm({
+    content: '',
+    type: 'comment',
+    followup_id: null,
+    ticket_id: ticketProps.ticket?.id || null,
+});
+
+const deleteFollowupForm = useForm({
+    // followup_id: null,
+});
+
+const isEditingFollowup = ref(null);
+
+const startEditingFollowup = (followup) => {
+    editFollowupForm.content = followup.content;
+    editFollowupForm.type = followup.type;
+    editFollowupForm.followup_id = followup.id;
+    isEditingFollowup.value = followup.id;
+};
+
+const cancelEditingFollowup = () => {
+    isEditingFollowup.value = null;
+    editFollowupForm.reset();
+    editFollowupForm.clearErrors();
+};
+
+const saveEditedFollowup = () => {
+    editFollowupForm.put(route('followups.update', editFollowupForm.followup_id), {
+        onSuccess: (response) => {
+            const message = response.props.flash.success || 'Follow-up updated';
+            toast.add({ severity: 'success', summary: 'Success', detail: message, life: 3000 });
+            const updatedFollowup = response.props.ticket.followups.find(f => f.id === editFollowupForm.followup_id)
+            const index = ticketProps.ticket.followups.findIndex(f => f.id === updatedFollowup.id);
+            if (index !== -1) {
+                ticketProps.ticket.followups.splice(index, 1, updatedFollowup);
+            }
+            cancelEditingFollowup();
+        },
+        onError: (errors) => {
+            const message = errors[0] || 'Error updating follow-up';
             toast.add({ severity: 'error', summary: 'Error', detail: message, life: 3000 });
         },
     });
@@ -93,10 +140,43 @@ const updatedDate = computed(() => formatDate(ticketProps.ticket?.updated_at));
 const goBack = () => {
     Inertia.visit(route('tickets.index')); // Replace with your route
 };
+
+const deleteConfirm = (followupId) => {
+    confirm.require({
+        message: 'Are you sure you want to proceed?',
+        header: 'Confirmation',
+        icon: 'pi pi-exclamation-triangle',
+        rejectProps: {
+            label: 'Cancel',
+            severity: 'secondary',
+            outlined: true
+        },
+        acceptProps: {
+            label: 'Confirm'
+        },
+        accept: () => {
+            deleteFollowupForm.delete(route("followups.destroy", { id: followupId }), {
+                preserveScroll: true,
+                onSuccess: () => {
+                    toast.add({ severity: 'success', summary: 'Success', detail: 'Follow-up deleted', life: 3000 });
+                    const index = ticketProps.ticket.followups.findIndex(f => f.id === followupId);
+                    if (index !== -1) {
+                        ticketProps.ticket.followups.splice(index, 1);
+                    }
+                },
+                onError: (errors) => {
+                    const message = errors[0] || 'Error deleting follow-up';
+                    toast.add({ severity: 'error', summary: 'Error', detail: message, life: 3000 });
+                },
+            });
+        },
+    });
+};
 </script>
 
 <template>
     <Toast />
+    <ConfirmDialog></ConfirmDialog>
 
     <div class="max-w-2xl mx-auto p-4 sm:px-6 md:max-w-full md:space-x-2 lg:px-8">
         <div class="flex mb-10">
@@ -104,6 +184,8 @@ const goBack = () => {
         </div>
 
         <div class="grid md:grid-cols-3 h-full gap-8">
+
+            <!-- Ticket form -->
             <form @submit.prevent="save" class="w-full min-h-full">
                 <div class="mb-4">
                     <label for="title" class="block text-sm font-medium"
@@ -190,24 +272,47 @@ const goBack = () => {
                         <template v-if="ticketProps.ticket.followups.length > 0">
                             <li v-for="followup in ticketProps.ticket.followups" :key="followup.id" class="mb-4">
                                 <div class="bg-white shadow rounded-lg p-4">
-                                    <div class="flex justify-between">
-                                        <div>
+                                    <div class="flex justify-between ">
+                                        <div class="flex flex-col">
                                             <span class="font-medium">{{ followup.user.name }}</span>
-                                            <span class="text-sm text-gray-500 ml-2">{{ formatDate(followup.created_at)
-                                                }}</span>
+
+                                            <div>
+
+                                                <span class="text-sm text-gray-500">{{
+                                                    formatDate(followup.updated_at)
+                                                    }}</span>
+                                                <span v-if="followup.created_at !== followup.updated_at"
+                                                    class="text-sm text-gray-400"> - edited</span>
+                                            </div>
+
                                         </div>
-                                        <div>
-                                            <span
-                                                class="inline-block px-2 py-1 text-xs font-semibold text-white rounded-full"
-                                                :class="{
-                                                    'bg-amber-400': followup.type === 'comment',
-                                                    'bg-blue-500': followup.type === 'solution'
-                                                }">
+                                        <div class="">
+                                            <Tag :style="{ backgroundColor: followup.type === 'comment' ? '#FFBF00' : '#1E90FF' }"
+                                                style="color: white">
                                                 {{ followup.type }}
-                                            </span>
+                                            </Tag>
+                                            <div class="flex justify-end">
+                                                <Button v-if="isEdit" icon="pi pi-pencil" text size="small"
+                                                    severity="secondary" @click="startEditingFollowup(followup)" />
+                                                <Button v-if="isEdit" icon="pi pi-trash" text size="small"
+                                                    severity="danger" @click="() => deleteConfirm(followup.id)" />
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                    <div v-if="isEditingFollowup === followup.id">
+                                        <textarea v-model="editFollowupForm.content"
+                                            class="block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm"
+                                            rows="4"></textarea>
+                                        <InputError :message="editFollowupForm.errors.content" class="mt-2" />
+                                        <div class="flex justify-end gap-2 mt-2">
+                                            <Button label="Cancel" severity="secondary"
+                                                @click="cancelEditingFollowup" />
+                                            <Button label="Save" severity="primary" @click="saveEditedFollowup" />
                                         </div>
                                     </div>
-                                    <p class="mt-2 text-gray-700">{{ followup.content }}</p>
+                                    <p v-else class="mt-2 text-gray-700">{{ followup.content }}</p>
                                 </div>
                             </li>
                         </template>
@@ -228,14 +333,12 @@ const goBack = () => {
                     ]" rows="4"></textarea>
                     <InputError :message="followupForm.errors.content" class="mt-2" />
                 </div>
-
                 <div class="mb-4">
                     <label for="followup-type" class="block text-sm font-medium">Follow-up Type</label>
-                    <select
-                    :disabled="!canCreateSolutionFollowups"
-                    v-model="followupForm.type" id="followup-type" :class="[
-                        'block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm'
-                    ]">
+                    <select :disabled="!canCreateSolutionFollowups" v-model="followupForm.type" id="followup-type"
+                        :class="[
+                            'block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm'
+                        ]">
                         <option value="comment">Comment</option>
                         <option value="solution">Solution</option>
                     </select>
@@ -243,7 +346,7 @@ const goBack = () => {
                 </div>
 
                 <div class="flex justify-end gap-2">
-                    <Button label="Reset" severity="secondary" class="mt-4" type="button"
+                    <Button label="Cancel" severity="secondary" class="mt-4" type="button"
                         @click="followupForm.reset(); followupForm.clearErrors()" />
                     <Button severity="primary" class="mt-4" type="submit">Add Follow-up</Button>
                 </div>

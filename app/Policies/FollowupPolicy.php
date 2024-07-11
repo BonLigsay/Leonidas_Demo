@@ -51,7 +51,7 @@ class FollowupPolicy
      */
     public function update(User $user, Followup $followup): bool
     {
-        return $user->can('update followup') || $user->id === $followup->user_id;
+        return $user->can('update followups') || $user->id === $followup->user_id;
     }
 
     /**
@@ -59,7 +59,7 @@ class FollowupPolicy
      */
     public function delete(User $user, Followup $followup): bool
     {
-        return $user->can('delete followup') || $user->id === $followup->user_id;
+        return $user->can('delete followups') || $user->id === $followup->user_id;
     }
 
     /**

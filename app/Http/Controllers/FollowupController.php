@@ -65,7 +65,7 @@ class FollowupController extends Controller
 
     public function update(Request $request, Followup $followup)
     {
-        Gate::authorize('update', Followup::class);
+        Gate::authorize('update', $followup);
 
         $request->validate([
             'content' => 'required|string',
@@ -80,7 +80,7 @@ class FollowupController extends Controller
 
     public function destroy(Followup $followup)
     {
-        Gate::authorize('delete' ,Followup::class);
+        Gate::authorize('delete', $followup);
 
         $followup->delete();
 
