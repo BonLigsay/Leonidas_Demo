@@ -19,8 +19,6 @@ const canCreateSolutionFollowups = hasPermission('create solution followups');
 const isAdmin = hasRole('admin');
 const canDeleteFollowups = hasPermission('delete followups');
 
-console.log(isAdmin)
-
 const confirm = useConfirm();
 const toast = useToast();
 
@@ -122,7 +120,6 @@ const cancelEditingFollowup = () => {
 const saveEditedFollowup = () => {
     editFollowupForm.put(route('followups.update', editFollowupForm.followup_id), {
         onSuccess: (response) => {
-            console.log({response})
             const message = response.props.flash.success || 'Follow-up updated';
             toast.add({ severity: 'success', summary: 'Success', detail: message, life: 3000 });
             const updatedFollowup = response.props.ticket.followups.find(f => f.id === editFollowupForm.followup_id)

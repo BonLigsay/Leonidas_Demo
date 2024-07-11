@@ -31,11 +31,17 @@ class FollowupController extends Controller
     {
         Gate::authorize('create', Followup::class);
 
-        if ($request->type === 'solution' ) {
-            // Gate::authorize('createSolution', Followup::class);
+        if ($request->type === 'solution') {
             if (!Gate::allows('createSolution', Followup::class)) {
-                // return redirect()->back()->with('error', 'Unauthorized to create solution follow-ups.');
                 return back()->withErrors(['Unauthorized to create solution follow-ups.']);
+            }
+
+            $existingSolution = Followup::where('ticket_id', $request->ticket_id)
+                                        ->where('type', 'solution')
+                                        ->first();
+
+            if ($existingSolution) {
+                return back()->withErrors(['A solution follow-up already exists for this ticket.']);
             }
         }
 
