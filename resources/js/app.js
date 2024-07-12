@@ -21,6 +21,11 @@ import Card from 'primevue/card';
 import ScrollPanel from 'primevue/scrollpanel';
 import Tag from 'primevue/tag';
 import Select from 'primevue/select';
+import Tabs from 'primevue/tabs';
+import TabList from 'primevue/tablist';
+import Tab from 'primevue/tab';
+import TabPanels from 'primevue/tabpanels';
+import TabPanel from 'primevue/tabpanel';
 import ConfirmDialog from 'primevue/confirmdialog';
 import ConfirmationService from 'primevue/confirmationservice';
 
@@ -53,6 +58,11 @@ createInertiaApp({
             .component('Card', Card)
             .component('Tag', Tag)
             .component('Select', Select)
+            .component('Tabs', Tabs)
+            .component('Tab', Tab)
+            .component('TabList', TabList)
+            .component('TabPanels', TabPanels)
+            .component('TabPanel', TabPanel)
             .component('ScrollPanel', ScrollPanel)
             .component('ConfirmDialog', ConfirmDialog)
             .component('Toast', Toast)
