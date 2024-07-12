@@ -1,12 +1,20 @@
+
 version: '3.8'
+
 services:
-  app:
-    image: php:8.0-apache
-    container_name: laravel-app
+  laravel:
+    restart: unless-stopped
+    container_name: laravelapp
+    build:
+      context: ../
+      dockerfile: ./deploy/Dockerfile
+    # allocate as many volumes as necessary, if needed.
     volumes:
-      - ./laravel-app:/var/www/html
+      - ../storage/app:/var/www/html/storage/app
+    env_file:
+      - ../.env
     ports:
-      - 8000:8000
+      - "8080:80"
     networks:
       - laravel
     depends_on:
