@@ -2,9 +2,9 @@
 version: '3.8'
 
 services:
-  laravel:
+  tickes-app:
     restart: unless-stopped
-    container_name: laravelapp
+    container_name: tickets-app
     build:
       context: ../
       dockerfile: ./deploy/Dockerfile
@@ -16,42 +16,42 @@ services:
     ports:
       - "8080:80"
     networks:
-      - laravel
+      - tickets-net
     depends_on:
-      - db
+      - tickets-db
 
-  db:
+  tickets-db:
     image: postgres:13
-    container_name: postgres-db
+    container_name: tickets-db
     restart: always
     ports:
      - 5432:5432
     environment:
-      POSTGRES_DB: laravel
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tickets
+      POSTGRES_USER: tickets
+      POSTGRES_PASSWORD: tickets
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - tickets-db-data:/var/lib/postgresql/data
     networks:
-      - laravel
+      - tickets-net
 
-  pgadmin:
+  tickets-pgadmin:
     image: dpage/pgadmin4
-    container_name: pgadmin4_container
+    container_name: tickets-pgadmin
     restart: always
     ports:
      - 8888:80
     environment:
-      PGADMIN_DEFAULT_EMAIL: postgres@tickets.com
-      PGADMIN_DEFAULT_PASSWORD: postgres
+      PGADMIN_DEFAULT_EMAIL: tickets@tickets.com
+      PGADMIN_DEFAULT_PASSWORD: tickets
     volumes:
-      - pgadmin-data:/var/lib/pgadmin
+      - tickets-pgadmin-data:/var/lib/pgadmin
     networks:
-      - laravel
+      - tickets-net
 
 volumes:
-  db_data:
-  pgadmin-data:
+  tickets-db-data:
+  tickets-pgadmin-data:
 
 networks:
-  laravel:
+  tickets-net:

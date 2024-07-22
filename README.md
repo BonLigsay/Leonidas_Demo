@@ -39,8 +39,8 @@ This project is a Ticket Management System focused on learning PHP, Laravel, and
     Run the following commands to migrate the database and seed the initial data:
 
     ```sh
-    docker exec -t laravelapp php artisan migrate
-    docker exec -t laravelapp php artisan db:seed   
+    docker exec -t tickets-app php artisan migrate
+    docker exec -t tickets-app php artisan db:seed   
 
 
 ## Usage
