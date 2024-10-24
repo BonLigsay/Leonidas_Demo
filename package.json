@@ -20,7 +20,10 @@
     "dependencies": {
         "@inertiajs/inertia-vue3": "^0.6.0",
         "@primevue/themes": "^4.0.0",
+        "d3": "^7.9.0",
+        "panzoom": "^9.4.3",
         "primeicons": "^7.0.0",
-        "primevue": "^4.0.0"
+        "primevue": "^4.0.0",
+        "topojson-client": "^3.1.0"
     }
 }

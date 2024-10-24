@@ -8,7 +8,7 @@ const props = defineProps({
     },
     width: {
         type: String,
-        default: '48',
+        default: '48', // Keep this as a string to pass various widths dynamically
     },
     contentClasses: {
         type: String,
@@ -25,10 +25,18 @@ const closeOnEscape = (e) => {
 onMounted(() => document.addEventListener('keydown', closeOnEscape));
 onUnmounted(() => document.removeEventListener('keydown', closeOnEscape));
 
+// Now mapping multiple width classes or directly using the value for dynamic width
 const widthClass = computed(() => {
-    return {
+    // Default Tailwind width classes
+    const widthMap = {
         48: 'w-48',
-    }[props.width.toString()];
+        56: 'w-56',
+        64: 'w-64',
+        72: 'w-72',
+        80: 'w-80',
+    };
+    // Return mapped class or custom width (e.g. "w-[300px]" for full control)
+    return widthMap[props.width] || `w-[${props.width}]`;
 });
 
 const alignmentClasses = computed(() => {

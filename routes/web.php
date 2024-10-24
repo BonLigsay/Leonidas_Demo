@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CatalogueController;
 use App\Http\Controllers\FollowupController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TicketController;
@@ -34,6 +35,10 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::resource('tickets', TicketController::class)
+    // ->only(['index', 'store'])
+    ->middleware(['auth', 'verified']);
+
+Route::resource('catalogue', CatalogueController::class)
     // ->only(['index', 'store'])
     ->middleware(['auth', 'verified']);
 

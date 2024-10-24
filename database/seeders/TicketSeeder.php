@@ -15,14 +15,6 @@ class TicketSeeder extends Seeder
      */
     public function run(): void
     {
-         // Truncate the tickets table
-         DB::table('tickets')->truncate();
-
-        // Ensure you have users in the database before running this
-        if (User::count() > 0) {
-            Ticket::factory()->count(50)->create();
-        } else {
-            $this->command->info('No users found. Please seed users first.');
-        }
+        Ticket::factory()->count(50)->create();
     }
 }

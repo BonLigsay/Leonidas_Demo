@@ -93,7 +93,7 @@ const getPriorityColorClass = (priority) => {
 
                         <template #header>
                             <div class="flex flex-wrap items-center justify-end gap-2 min-h-8">
-                                <Link v-if="isUser" :href="route('tickets.create')">
+                                <Link :href="route('tickets.create')">
                                     <Button label="Add Ticket" icon="pi pi-plus-circle" rounded link />
                                 </Link>
                             </div>

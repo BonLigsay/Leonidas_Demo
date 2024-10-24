@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ticket;
-// use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -44,7 +44,7 @@ class TicketController extends Controller
     public function store(Request $request): RedirectResponse
     {
         // try {
-        Gate::authorize('create', Ticket::class);
+        // Gate::authorize('create', Ticket::class);
         // } catch (AuthorizationException $e) {
         //     return redirect()->back()->withErrors(['message' => 'You are not authorized to create a ticket.']);
         // }
